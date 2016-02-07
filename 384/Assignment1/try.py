@@ -8,7 +8,8 @@ for i in v:
         new_vehicle.append(new_i)
         print(new_vehicle)
 """
-#matrix = [[" " for x in range(7)] for x in range(7)]
-#print (matrix)
+matrix = [[" " for x in range(3)] for x in range(7)]
+print (matrix)
 #for i in range(2):
 #    print (i)
+

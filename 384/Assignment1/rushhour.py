@@ -19,7 +19,7 @@ from random import randint
 
 	
 class rushhour(StateSpace):
-    def __init__(self, action, gval, name, loc, length, is_horizontal, is_goal, parent = None):
+    def __init__(self, action, gval, vehicle_statues, board_properties, parent = None):
 	#IMPLEMENT
         """Initialize a rushhour search state object."""
         StateSpace.__init__(self, action, gval, parent)
@@ -50,15 +50,79 @@ class rushhour(StateSpace):
                         cut_counter = cut_counter + 1
     
         for v in self.vehicle_statues:
+            index = 0
+            v_x = v[1][0]
+            v_y = v[1][1]
+            board_xedge = self.board_properties[0][0]
+            board_yedge = self.board_properties[0][1]
             if v[3] == True: #if the vehicle is horizontal
-                if v[1][0] - 1 >= 0 and board[v[1][1]][v[1][0]-1] == ' ':
-                    new_vehicle_statues = 
-                    States.append(rushhour('W', self.gval +1, v[1], ))
+                if board[v_y][(v_x-1)%(board_xedge)] == ' ':
+                    new_vehicle_statues = [v[0], (((v_x-1)%(board_xedge)),v_y), v[2], v[3], v[4]]
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',W)', self.gval +1, new_vehicle_statues, self.board_properties))
 
+                if board[v_y][(v_x+1)%(board_xedge)] == ' ':
+                    new_vehicle_statues = [v[0], ((v_x+1)%(board_xedge),v_y), v[2], v[3], v[4]]
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',E)', self.gval +1, new_vehicle_statues, self.board_properties))
+
+            else: #if the vehicle is vertical
+                if board[(v_y - 1)%(board_yedge)][v_x] == ' ':
+                    new_vehicle_statues = [v[0], (v_x,(v_y-1)%(board_yedge)), v[2], v[3], v[4]]
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',N)', self.gval +1, new_vehicle_statues, self.board_properties))
+
+                if board[(v_y + 1)%(board_yedge)][v_x] == ' ':
+                    new_vehicle_statues = [v[0], (v_x,(v_y+1)%(board_yedge)), v[2], v[3], v[4]]
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',S)', self.gval +1, new_vehicle_statues, self.board_properties))
+
+            index = index +1
+        return States
+
+"""
+            if v[3] == True: #if the vehicle is horizontal
+                if v_x - 1 >= 0 and board[v_y][v_x-1] == ' ':
+                    new_vehicle_statues = [v[0], (v_x-1,v_y), v[2], v[3], v[4]]
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',W)', self.gval +1, new_vehicle_statues, self.board_properties))
+                if v_x - 1 < 0 and board[v_y][board_xedge-1] == ' ':#board[y][x]
+                    new_vehicle_statues = [v[0], (board_xedge-1,v_y), v[2], v[3], v[4]] #board_properties[0][0]-1 board x edge
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',W)', self.gval +1, new_vehicle_statues, self.board_properties))
+
+                if v_x + 1 <= (board_xedge - 1) and board[v_y][v_x+1] == ' ':
+                    new_vehicle_statues = [v[0], (v_x+1,v_y), v[2], v[3], v[4]]
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',E)', self.gval +1, new_vehicle_statues, self.board_properties))
+                if v_x + 1 > (board_xedge - 1) and board[v_y][board_xedge-1] == ' ':#board[y][x]
+                    new_vehicle_statues = [v[0], (board_xedge - 1,v_y), v[2], v[3], v[4]] #board_properties[0][0]-1 board x edge
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',E)', self.gval +1, new_vehicle_statues, self.board_properties))
+
+            else: #if the vehicle is vertical
+                if v_y - 1 >= 0 and board[v_y - 1][v_x] == ' ':
+                    new_vehicle_statues = [v[0], (v_x,v_y-1), v[2], v[3], v[4]]
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',N)', self.gval +1, new_vehicle_statues, self.board_properties))
+                if v_y - 1 < 0 and board[board_yedge-1][v_x] == ' ':#board[y][x]
+                    new_vehicle_statues = [v[0], (v_x,board_yedge-1), v[2], v[3], v[4]] #board_properties[0][0]-1 board x edge
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',N)', self.gval +1, new_vehicle_statues, self.board_properties))
+
+                if v_y + 1 <= (board_yedge - 1) and board[v_y+1][v_x] == ' ':
+                    new_vehicle_statues = [v[0], (v_x,v_y+1), v[2], v[3], v[4]]
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',S)', self.gval +1, new_vehicle_statues, self.board_properties))
+                if v_y + 1 > (board_yedge - 1) and board[board_yedge-1][v_x] == ' ':#board[y][x]
+                    new_vehicle_statues = [v[0], (v_x,board_yedge-1), v[2], v[3], v[4]] #board_properties[0][0]-1 board x edge
+                    self.vehicle_statues[index] = new_vehicle_statues
+                    States.append(rushhour('move_vehicle('+v[0]+',S)', self.gval +1, new_vehicle_statues, self.board_properties))"""
 
     def hashable_state(self):
 #IMPLEMENT
         '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.'''
+        return (self.vehicle_statues, self.board_properties)
 
     def print_state(self):
         #DO NOT CHANGE THIS FUNCTION---it will be used in auto marking
@@ -136,12 +200,55 @@ def heur_min_moves(state):
     #Our heuristic value is the minimum of MOVES1 and MOVES2 over all goal vehicles.
     #You should implement this heuristic function exactly, even if it is
     #tempting to improve it.
-
+"""
+    for v in rushhour.vehicle_statues:
+        cut_counter = 0
+        if v[3] == True:#is_horizontal = True
+	    for i in range(v[2]):#v_length
+	        if v[1][0]+i <= board_properties[0][0]-1:#BE CAREFUL, ON BOARD DOUBLE LIST X AND Y ARE OPPOSITE
+	            board[v[1][1]][v[1][0]+i] = v[0]
+	        else:
+	            board[v[1][1]][0+cut_counter] = v[0]
+	            cut_counter = cut_counter + 1
+        else: #is_horizontal = False
+	    for i in range(v[2]):#v_length
+	        if v[1][1]+i <= board_properties[0][1]-1:
+	            board[v[1][1]+i][v[1][0]] = v[0]
+	        else:
+	            board[0+cut_counter][v[1][0]] = v[0]
+	            cut_counter = cut_counter + 1
+"""
+    goal_entrance = rushhour.board_properties[2]
+    goal_orientation = rushhour.board_properties[3]
+    board_xedge = rushhour.board_properties[0][0]
+    board_yedge = rushhour.board_properties[0][1]
+    MOVES1 = 0
+    MOVES2 = 0
+    MIN = max(board_xedge, board_yedge)
+    for v in rushhour.vehicle_statues:
+        is_horizontal = v[3]
+        if v[4] == True:
+            if is_horizontal:
+                if goal_orientation == 'E' or goal_orientation == 'W':
+                    if v[1][0] == goal_entrance[0]:
+                        MOVES1 = abs(v[1][0]-goal_entrance[0])
+                        MOVES2 = board_xedge-MOVES1
+            else:
+                if goal_orientation == 'N' or goal_orientation == 'S':
+                    if v[1][1] == goal_entrance[1]:
+                        MOVES1 = abs(v[1][1]-goal_entrance[1])
+                        MOVES2 = board_yedge-MOVES1
+            MIN = min(MIN, MOVES1, MOVES2)
+        else:
+            continue
+                
+    return MIN
 
 def rushhour_goal_fn(state):
 #IMPLEMENT
     '''Have we reached a goal state'''
-    
+    if heur_min_moves(state) == 0:
+        return True
 
 def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
 #IMPLEMENT
@@ -169,11 +276,12 @@ def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
          (b) all locations are integer pairs (x,y) where 0<=x<=n-1 and 0<=y<=m-1
          (c) vehicle lengths are positive integers
     '''
-    rushhour.board_properties = (board_size, goal_entrance, goal_orientation)
     #rushhour.board_size = board_size
-    rushhour.vehicle_list = vehicle_list
     #rushhour.goal_entrance = goal_entrance
     #rushhour.goal_direction = goal_direction
+    
+    rushhour.board_properties = (board_size, goal_entrance, goal_orientation)
+    rushhour.vehicle_list = vehicle_list
 
 ########################################################
 #   Functions provided so that you can more easily     #
