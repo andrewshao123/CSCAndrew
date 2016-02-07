@@ -11,7 +11,7 @@ rushhour STATESPACE
 
 from search import *
 from random import randint
-
+from copy import deepcopy
 ##################################################
 # The search space class 'rushhour'             #
 # This class is a sub-class of 'StateSpace'      #
@@ -19,110 +19,93 @@ from random import randint
 
 	
 class rushhour(StateSpace):
-    def __init__(self, action, gval, vehicle_statues, board_properties, parent = None):
+    def __init__(self, action, gval, vehicle_statuses, board_properties, parent = None):
 	#IMPLEMENT
         """Initialize a rushhour search state object."""
         StateSpace.__init__(self, action, gval, parent)
-        self.vehicle_statues = get_vehicle_statuses(self)
-	self.board_properties = get_board_properties(self)
+        self.vehicle_statuses = vehicle_statuses
+        self.board_properties = board_properties
 
     def successors(self):
 #IMPLEMENT
         '''Return list of rushhour objects that are the successors of the current object'''
         States = list()
-        board = [[' ' for x in range(self.board_properties[0][0])] for x in range(self.board_properties[0][1])]
-        print(board)
-	for v in self.vehicle_statues:
-            cut_counter = 0
-            if v[3] == True:#is_horizontal = True
-                for i in range(v[2]):#v_length
-                    if v[1][0]+i <= board_properties[0][0]-1:#BE CAREFUL, ON BOARD DOUBLE LIST X AND Y ARE OPPOSITE
-                        board[v[1][1]][v[1][0]+i] = v[0]
-                    else:
-                        board[v[1][1]][0+cut_counter] = v[0]
-                        cut_counter = cut_counter + 1
-            else: #is_horizontal = False
-                for i in range(v[2]):#v_length
-                    if v[1][1]+i <= board_properties[0][1]-1:
-                        board[v[1][1]+i][v[1][0]] = v[0]
-                    else:
-                        board[0+cut_counter][v[1][0]] = v[0]
-                        cut_counter = cut_counter + 1
-    
-        for v in self.vehicle_statues:
-            index = 0
+        board_xedge = self.board_properties[0][0]
+        board_yedge = self.board_properties[0][1]
+
+        board = [[' ' for x in range(board_xedge)] for x in range(board_yedge)]
+
+        for v in self.get_vehicle_statuses():
             v_x = v[1][0]
             v_y = v[1][1]
-            board_xedge = self.board_properties[0][0]
-            board_yedge = self.board_properties[0][1]
-            if v[3] == True: #if the vehicle is horizontal
-                if board[v_y][(v_x-1)%(board_xedge)] == ' ':
-                    new_vehicle_statues = [v[0], (((v_x-1)%(board_xedge)),v_y), v[2], v[3], v[4]]
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',W)', self.gval +1, new_vehicle_statues, self.board_properties))
+            if v[3] == True:#is_horizontal = True
+                for i in range(v[2]):#v_length
+                    board[v_y][(v_x+i)%board_xedge] = v[0]
+            else: #is_horizontal = False
+                for i in range(v[2]):#v_length
+                    board[(v_y+i)%board_yedge][v_x] = v[0]
+        #print(board)
+        index = 0
+        for i in range(len(self.get_vehicle_statuses())):
+            v_name = self.vehicle_statuses[i][0]
+            v_x = self.vehicle_statuses[i][1][0]
+            v_y = self.vehicle_statuses[i][1][1]
+            v_len = self.vehicle_statuses[i][2]
+            v_hor = self.vehicle_statuses[i][3]
+            v_goal = self.vehicle_statuses[i][4]
+            if v_hor == True: #if the vehicle is horizontal
+                if board[v_y][(v_x - 1)%(board_xedge)] == ' ':
+                    new_vehicle_statuses = deepcopy(self.vehicle_statuses)
+                    #print(new_vehicle_statuses)
+                    new_vehicle_statuses[i][1] = ((v_x-1)%(board_xedge),v_y)
+                    #print((new_vehicle_statuses))
+                    States.append(rushhour('move_vehicle('+v_name+', W)', self.gval +1, new_vehicle_statuses, list(self.get_board_properties()), self))
 
-                if board[v_y][(v_x+1)%(board_xedge)] == ' ':
-                    new_vehicle_statues = [v[0], ((v_x+1)%(board_xedge),v_y), v[2], v[3], v[4]]
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',E)', self.gval +1, new_vehicle_statues, self.board_properties))
+
+                if board[v_y][(v_x+v_len)%(board_xedge)] == ' ':
+                    new_vehicle_statuses = deepcopy(self.vehicle_statuses)
+                    new_vehicle_statuses[i][1] = ((v_x+1)%(board_xedge),v_y)
+                    #print((new_vehicle_statuses))
+                    States.append(rushhour('move_vehicle('+v_name+', E)', self.gval +1, new_vehicle_statuses, list(self.get_board_properties()), self))
 
             else: #if the vehicle is vertical
                 if board[(v_y - 1)%(board_yedge)][v_x] == ' ':
-                    new_vehicle_statues = [v[0], (v_x,(v_y-1)%(board_yedge)), v[2], v[3], v[4]]
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',N)', self.gval +1, new_vehicle_statues, self.board_properties))
+                    new_vehicle_statuses = deepcopy(self.vehicle_statuses)
+                    new_vehicle_statuses[i][1] = (v_x,(v_y - 1)%(board_yedge))
+                    #print((new_vehicle_statuses))
+                    States.append(rushhour('move_vehicle('+v_name+', N)', self.gval +1, new_vehicle_statuses, list(self.get_board_properties()), self))
 
-                if board[(v_y + 1)%(board_yedge)][v_x] == ' ':
-                    new_vehicle_statues = [v[0], (v_x,(v_y+1)%(board_yedge)), v[2], v[3], v[4]]
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',S)', self.gval +1, new_vehicle_statues, self.board_properties))
-
+                if board[(v_y + v_len)%(board_yedge)][v_x] == ' ':
+                    new_vehicle_statuses = deepcopy(self.vehicle_statuses)
+                    new_vehicle_statuses[i][1] = (v_x,(v_y + 1)%(board_yedge))
+                    #print((new_vehicle_statuses))
+                    States.append(rushhour('move_vehicle('+v_name+', S)', self.gval +1, new_vehicle_statuses, list(self.get_board_properties()), self))
             index = index +1
+        #print('before')
+        #student_vehicles = sorted(s.successors()[i].get_vehicle_statuses())
+        #for vs in sorted(self.vehicle_statuses):
+        #    print('**************')
+        print('after*****************')
+        print(len(States))
+        i = 0
+        for x in States:
+            print((x.get_vehicle_statuses()))
+            print((x.get_board_properties()))
+            #x.print_state()
+            #i += 1
         return States
-
-"""
-            if v[3] == True: #if the vehicle is horizontal
-                if v_x - 1 >= 0 and board[v_y][v_x-1] == ' ':
-                    new_vehicle_statues = [v[0], (v_x-1,v_y), v[2], v[3], v[4]]
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',W)', self.gval +1, new_vehicle_statues, self.board_properties))
-                if v_x - 1 < 0 and board[v_y][board_xedge-1] == ' ':#board[y][x]
-                    new_vehicle_statues = [v[0], (board_xedge-1,v_y), v[2], v[3], v[4]] #board_properties[0][0]-1 board x edge
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',W)', self.gval +1, new_vehicle_statues, self.board_properties))
-
-                if v_x + 1 <= (board_xedge - 1) and board[v_y][v_x+1] == ' ':
-                    new_vehicle_statues = [v[0], (v_x+1,v_y), v[2], v[3], v[4]]
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',E)', self.gval +1, new_vehicle_statues, self.board_properties))
-                if v_x + 1 > (board_xedge - 1) and board[v_y][board_xedge-1] == ' ':#board[y][x]
-                    new_vehicle_statues = [v[0], (board_xedge - 1,v_y), v[2], v[3], v[4]] #board_properties[0][0]-1 board x edge
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',E)', self.gval +1, new_vehicle_statues, self.board_properties))
-
-            else: #if the vehicle is vertical
-                if v_y - 1 >= 0 and board[v_y - 1][v_x] == ' ':
-                    new_vehicle_statues = [v[0], (v_x,v_y-1), v[2], v[3], v[4]]
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',N)', self.gval +1, new_vehicle_statues, self.board_properties))
-                if v_y - 1 < 0 and board[board_yedge-1][v_x] == ' ':#board[y][x]
-                    new_vehicle_statues = [v[0], (v_x,board_yedge-1), v[2], v[3], v[4]] #board_properties[0][0]-1 board x edge
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',N)', self.gval +1, new_vehicle_statues, self.board_properties))
-
-                if v_y + 1 <= (board_yedge - 1) and board[v_y+1][v_x] == ' ':
-                    new_vehicle_statues = [v[0], (v_x,v_y+1), v[2], v[3], v[4]]
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',S)', self.gval +1, new_vehicle_statues, self.board_properties))
-                if v_y + 1 > (board_yedge - 1) and board[board_yedge-1][v_x] == ' ':#board[y][x]
-                    new_vehicle_statues = [v[0], (v_x,board_yedge-1), v[2], v[3], v[4]] #board_properties[0][0]-1 board x edge
-                    self.vehicle_statues[index] = new_vehicle_statues
-                    States.append(rushhour('move_vehicle('+v[0]+',S)', self.gval +1, new_vehicle_statues, self.board_properties))"""
 
     def hashable_state(self):
 #IMPLEMENT
-        '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.'''
-        return (self.vehicle_statues, self.board_properties)
+        '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.''' 
+        vehicle_statuses = []
+        board_properties = []
+        index = 0
+        for i in range(len(self.vehicle_statuses)):
+            vehicle_statuses.append(tuple(list(self.vehicle_statuses[i])))
+        for i in range(len(self.board_properties)):
+            board_properties.append(tuple(list(self.board_properties[i])))
+        return (tuple(vehicle_statuses), tuple(board_properties))
 
     def print_state(self):
         #DO NOT CHANGE THIS FUNCTION---it will be used in auto marking
@@ -161,7 +144,7 @@ class rushhour(StateSpace):
                  <is_horizontal> is true iff the vehicle is oriented horizontally
                  <is_goal> is true iff the vehicle is a goal vehicle
         '''
-        return self.vehicle_list
+        return self.vehicle_statuses
 
     def get_board_properties(self):
 #IMPLEMENT
@@ -200,35 +183,20 @@ def heur_min_moves(state):
     #Our heuristic value is the minimum of MOVES1 and MOVES2 over all goal vehicles.
     #You should implement this heuristic function exactly, even if it is
     #tempting to improve it.
-"""
-    for v in rushhour.vehicle_statues:
-        cut_counter = 0
-        if v[3] == True:#is_horizontal = True
-	    for i in range(v[2]):#v_length
-	        if v[1][0]+i <= board_properties[0][0]-1:#BE CAREFUL, ON BOARD DOUBLE LIST X AND Y ARE OPPOSITE
-	            board[v[1][1]][v[1][0]+i] = v[0]
-	        else:
-	            board[v[1][1]][0+cut_counter] = v[0]
-	            cut_counter = cut_counter + 1
-        else: #is_horizontal = False
-	    for i in range(v[2]):#v_length
-	        if v[1][1]+i <= board_properties[0][1]-1:
-	            board[v[1][1]+i][v[1][0]] = v[0]
-	        else:
-	            board[0+cut_counter][v[1][0]] = v[0]
-	            cut_counter = cut_counter + 1
-"""
-    goal_entrance = rushhour.board_properties[2]
-    goal_orientation = rushhour.board_properties[3]
-    board_xedge = rushhour.board_properties[0][0]
-    board_yedge = rushhour.board_properties[0][1]
+
+    vehicle_statuses = state.get_vehicle_statuses()
+    board_properties = state.get_board_properties()
+    goal_entrance = board_properties[1]
+    goal_orientation = board_properties[2]
+    board_xedge = board_properties[0][0]
+    board_yedge = board_properties[0][1]
     MOVES1 = 0
     MOVES2 = 0
     MIN = max(board_xedge, board_yedge)
-    for v in rushhour.vehicle_statues:
-        is_horizontal = v[3]
-        if v[4] == True:
-            if is_horizontal:
+    for v in vehicle_statuses:
+        #is_horizontal = v[3]
+        if v[4] == True:#is_goal
+            if v[3]:
                 if goal_orientation == 'E' or goal_orientation == 'W':
                     if v[1][0] == goal_entrance[0]:
                         MOVES1 = abs(v[1][0]-goal_entrance[0])
@@ -247,8 +215,7 @@ def heur_min_moves(state):
 def rushhour_goal_fn(state):
 #IMPLEMENT
     '''Have we reached a goal state'''
-    if heur_min_moves(state) == 0:
-        return True
+    return (heur_min_moves(state) == 0)
 
 def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
 #IMPLEMENT
@@ -276,13 +243,11 @@ def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
          (b) all locations are integer pairs (x,y) where 0<=x<=n-1 and 0<=y<=m-1
          (c) vehicle lengths are positive integers
     '''
-    #rushhour.board_size = board_size
-    #rushhour.goal_entrance = goal_entrance
-    #rushhour.goal_direction = goal_direction
-    
-    rushhour.board_properties = (board_size, goal_entrance, goal_orientation)
-    rushhour.vehicle_list = vehicle_list
-
+    #self, action, gval, vehicle_statuses, board_properties, parent = None):
+    #(board_size, vehicle_list, goal_entrance, goal_direction):
+    board_properties = (board_size, goal_entrance, goal_direction)
+    vehicle_list = vehicle_list
+    return rushhour("START",0 ,vehicle_list, board_properties, None)
 ########################################################
 #   Functions provided so that you can more easily     #
 #   Test your implementation                           #
@@ -369,3 +334,5 @@ def test(nvehicles, board_size):
     se = SearchEngine('astar', 'full')
     #se.trace_on(2)
     final = se.search(s0, rushhour_goal_fn, heur_min_moves)
+
+#test(3,(7,7))
