@@ -103,7 +103,63 @@ def test_5x5(model, prop):
     puzzle = [([0]*size) for x in range(size)];
     cage = [[[(0,0),(0,1),(1,1)],36,'*'],[[(1,0),(2,0)],6,'+'],[[(3,0),(4,0),(4,1)],11,'+'],[[(2,1),(3,1)],3,'+'],[[(0,2),(0,3),(0,4)],10,'*'],[[(1,2),(1,3)],2,'/'],[[(2,2),(3,2),(3,3)],11,'+'],[[(4,2),(4,3)],1,'-'],[[(1,4),(2,4),(2,3)],75,'*'],[[(3,4),(4,4)],4,'*']]
     return run_csp(model, prop, size, puzzle, cage)
+
+def test_5x5_plus(model, prop):
+    '''
+(0,0),(1,0),(2,0),(3,0),(4,0)
+12+ 9+ 10+ 10+ 10+>>          
+(0,1),(1,1),(2,1),(3,1),(4,1)
+12+ 9+ 9+ 10+ 10+>>         
+(0,2),(1,2),(2,2),(3,2),(4,2)
+12+ 11+ 11+ 5+ 10+->>          
+(0,3),(1,3),(2,3),(3,3),(4,3)
+7+ 7+ 11+ 5+ 10+>>          
+(0,4),(1,4),(2,4),(3,4),(4,4)
+7+ 7+ 9+ 9+ 2+>>   
+    '''
+    print("Testing 5x5 empty board...", end='');
+    size = 5
+    puzzle = [([0]*size) for x in range(size)];
+    cage = [[[(0,0),(0,1),(0,2)],12,'+'],[[(1,0),(1,1),(2,1)],9,'+'],[[(2,0),(3,0),(4,0),(3,1)],10,'+'],[[(4,1),(4,2),(4,3)],10,'+'],[[(3,2),(3,3)],5,'+'],[[(1,2),(2,2),(2,3)],11,'+'],[[(0,3),(1,3),(0,4),(1,4)],7,'+'],[[(2,4),(3,4)],9,'+'],[[(4,4)],2,'+']]
+    return run_csp(model, prop, size, puzzle, cage)
     
+def test_5x5_plus_minus(model, prop):
+    '''
+(0,0),(1,0),(2,0),(3,0),(4,0)
+2+ 12+ 12+ 12+ 2->>          
+(0,1),(1,1),(2,1),(3,1),(4,1)
+2- 11+ 11+ 8+ 2->>         
+(0,2),(1,2),(2,2),(3,2),(4,2)
+2- 11+ 8+ 8+ 8+>>          
+(0,3),(1,3),(2,3),(3,3),(4,3)
+9+ 2- 2- 3- 3->>          
+(0,4),(1,4),(2,4),(3,4),(4,4)
+9+ 9+ 1- 1- 5>>   
+    '''
+    print("Testing 5x5 empty board...", end='');
+    size = 5
+    puzzle = [([0]*size) for x in range(size)];
+    cage = [[[(0,0)],2,'+'],[[(1,0),(2,0),(3,0)],12,'+'],[[(4,0),(4,1)],2,'-'],[[(0,1),(0,2)],2,'-'],[[(1,1),(2,1),(1,2)],11,'+'],[[(3,1),(2,2),(3,2),(4,2)],8,'+'],[[(0,3),(0,4),(1,4)],9,'+'],[[(1,3),(2,3)],2,'-'],[[(3,3),(4,3)],3,'-'],[[(2,4),(3,4)],1,'-'],[[(4,4)],5,'+']]
+    return run_csp(model, prop, size, puzzle, cage)
+
+def test_5x5_multiply_divide(model, prop):
+    '''
+(0,0),(1,0),(2,0),(3,0),(4,0)
+20* 20* 20* 40* 3>>          
+(0,1),(1,1),(2,1),(3,1),(4,1)
+20* 30* 12* 40* 40*>>         
+(0,2),(1,2),(2,2),(3,2),(4,2)
+30* 30* 12* 40* 10*>>          
+(0,3),(1,3),(2,3),(3,3),(4,3)
+2/ 2/ 60* 60* 10*>>          
+(0,4),(1,4),(2,4),(3,4),(4,4)
+6* 6* 6* 60* 10*>>   
+    '''
+    print("Testing 5x5 empty board...", end='');
+    size = 5
+    puzzle = [([0]*size) for x in range(size)];
+    cage = [[[(0,0),(1,0),(2,0),(0,1)],20,'*'],[[(3,0),(3,1),(4,1),(3,2)],40,'*'],[[(4,0)],3,'+'],[[(1,1),(1,2),(0,2)],30,'*'],[[(2,1),(2,2)],12,'*'],[[(4,2),(4,3),(4,4)],10,'*'],[[(0,3),(1,3)],2,'/'],[[(2,3),(3,3),(3,4)],60,'*'],[[(0,4),(1,4),(2,4)],6,'*']]
+    return run_csp(model, prop, size, puzzle, cage)
 
 def run_csp(model, prop, size, puzzle, cage):
     csp, vars_array = model(puzzle,cage);
@@ -149,6 +205,7 @@ def run_csp(model, prop, size, puzzle, cage):
 ###################main code#####################################
 models = [calcudoku_csp.calcudoku_csp_model_1, calcudoku_csp.calcudoku_csp_model_2]
 propagator_types = [propagators.prop_FC,propagators.prop_GAC]
+'''
 t2 = time.time()
 for m in models:
     for p in propagator_types:
@@ -161,7 +218,6 @@ for m in models:
         info_list.append(test_4x4(m,p))
         info_list.append(test_5x5(m,p))
         #time, variable assignments, pruned variables
-        #print(time_list)
         
         if p == propagator_types[0] and m == models[0]:
             #time, variable assignments, pruned variables tupple lists for 6 tests by using FC
@@ -191,3 +247,41 @@ for m in models:
 t3 = time.time()
 for_loop_difference = t3-t2
 print('total time for everything is: ',for_loop_difference)
+'''
+t4 = time.time()
+for m in models:
+    for p in propagator_types:
+        #order: plus only, plus&minus, multiply&divide, all four
+        info_list = []
+        info_list.append(test_5x5_plus(m, p))
+        info_list.append(test_5x5_plus_minus(m, p))
+        info_list.append(test_5x5_multiply_divide(m, p))
+        info_list.append(test_5x5(m,p))
+        if p == propagator_types[0] and m == models[0]:
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using FC
+            FC_info_list_m1 = list(info_list)            
+            print(FC_info_list_m1)
+        if p == propagator_types[1] and m == models[0]:
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using GAC
+            GAC_info_list_m1 = list(info_list)
+            print(GAC_info_list_m1)
+        #if p == propagator_types[2] and m == models[0]:
+        #    #time, variable assignments, pruned variables tupple lists for 6 tests by using BT
+        #    BT_info_list_m1 = list(info_list)
+        #    print(BT_info_list_m1)
+        if p == propagator_types[0] and m == models[1]:
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using FC
+            FC_info_list_m2 = list(info_list)
+            print(FC_info_list_m2)
+        if p == propagator_types[1] and m == models[1]:
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using GAC
+            GAC_info_list_m2 = list(info_list)
+            print(GAC_info_list_m2)
+        #if p == propagator_types[2] and m == models[1]:
+        #    #time, variable assignments, pruned variables tupple lists for 6 tests by using BT
+        #    BT_time_list_m2 = list(info_list)
+        #    print(BT_time_list_m2)
+t5 = time.time()
+for_loop_difference = t5-t4
+print('total time for operations is: ',for_loop_difference)
+
