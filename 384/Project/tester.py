@@ -118,7 +118,6 @@ def run_csp(model, prop, size, puzzle, cage):
     t1 = time.time()
     time_difference = t1-t0
 
-
     #print(time_difference)
 
     for row in vars_array:
@@ -143,39 +142,52 @@ def run_csp(model, prop, size, puzzle, cage):
     print('passed!')
     print('The time difference for {} and {} is:'.format(model, prop))
     print(time_difference)
-    return time_difference
+    #time, variable assignments, pruned variables
+    return time_difference, btracker.nDecisions, btracker.nPrunings
 
 
 ###################main code#####################################
 models = [calcudoku_csp.calcudoku_csp_model_1, calcudoku_csp.calcudoku_csp_model_2]
-propagator_types = [propagators.prop_FC,propagators.prop_GAC, propagators.prop_BT]
+propagator_types = [propagators.prop_FC,propagators.prop_GAC]
+t2 = time.time()
 for m in models:
-    time_list = []
     for p in propagator_types:
-        time_list.append(test_1x1(m,p))
-        time_list.append(test_2x2_1(m,p))
-        time_list.append(test_2x2_2(m,p))
-        #time_list.append(test_2x2_3(m,p))
-        time_list.append(test_3x3(m,p))
-        time_list.append(test_4x4(m,p))
-        time_list.append(test_5x5(m,p))
+        info_list = []
+        info_list.append(test_1x1(m,p))
+        info_list.append(test_2x2_1(m,p))
+        info_list.append(test_2x2_2(m,p))
+        
+        info_list.append(test_3x3(m,p))
+        info_list.append(test_4x4(m,p))
+        info_list.append(test_5x5(m,p))
+        #time, variable assignments, pruned variables
+        #print(time_list)
+        
         if p == propagator_types[0] and m == models[0]:
-            FC_time_list_m1 = time_listS
-            
-            print(FC_time_list_m1)
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using FC
+            FC_info_list_m1 = list(info_list)            
+            print(FC_info_list_m1)
         if p == propagator_types[1] and m == models[0]:
-            GAC_time_list_m1 = time_list
-            print(GAC_time_list_m1)
-        if p == propagator_types[2] and m == models[0]:
-            BT_time_list_m1 = time_list
-            print(BT_time_list_m1)
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using GAC
+            GAC_info_list_m1 = list(info_list)
+            print(GAC_info_list_m1)
+        #if p == propagator_types[2] and m == models[0]:
+        #    #time, variable assignments, pruned variables tupple lists for 6 tests by using BT
+        #    BT_info_list_m1 = list(info_list)
+        #    print(BT_info_list_m1)
         if p == propagator_types[0] and m == models[1]:
-            FC_time_list_m2 = time_list
-            print(FC_time_list_m2)
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using FC
+            FC_info_list_m2 = list(info_list)
+            print(FC_info_list_m2)
         if p == propagator_types[1] and m == models[1]:
-            GAC_time_list_m2 = time_list
-            print(GAC_time_list_m2)
-        if p == propagator_types[2] and m == models[1]:
-            BT_time_list_m2 = time_list
-            print(BT_time_list_m2)
-
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using GAC
+            GAC_info_list_m2 = list(info_list)
+            print(GAC_info_list_m2)
+        #if p == propagator_types[2] and m == models[1]:
+        #    #time, variable assignments, pruned variables tupple lists for 6 tests by using BT
+        #    BT_time_list_m2 = list(info_list)
+        #    print(BT_time_list_m2)
+        
+t3 = time.time()
+for_loop_difference = t3-t2
+print('total time for everything is: ',for_loop_difference)
