@@ -161,6 +161,33 @@ def test_5x5_multiply_divide(model, prop):
     cage = [[[(0,0),(1,0),(2,0),(0,1)],20,'*'],[[(3,0),(3,1),(4,1),(3,2)],40,'*'],[[(4,0)],3,'+'],[[(1,1),(1,2),(0,2)],30,'*'],[[(2,1),(2,2)],12,'*'],[[(4,2),(4,3),(4,4)],10,'*'],[[(0,3),(1,3)],2,'/'],[[(2,3),(3,3),(3,4)],60,'*'],[[(0,4),(1,4),(2,4)],6,'*']]
     return run_csp(model, prop, size, puzzle, cage)
 
+def test_9x9_multiply_divide(model, prop):
+    '''
+(0,0),(1,0),(2,0),(3,0),(4,0),(5,0),(6,0),(7,0),(8,0)
+3/    3/    24+   24+   2-    2-    56*   56*   7-
+(0,1),(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1)
+4-    4-    24+   1-    4-    2/    2/    1     7-
+(0,2),(1,2),(2,2),(3,2),(4,2),(5,2),(6,2),(7,2),(8,2)
+11+   11+   24+   1-    4-    8*    4/    4/    12+
+(0,3),(1,3),(2,3),(3,3),(4,3),(5,3),(6,3),(7,3),(8,3)
+5-    5-    3/    3/    2/    8*    63*   63*   12+
+(0,4),(1,4),(2,4),(3,4),(4,4),(5,4),(6,4),(7,4),(8,4)
+5-    21+   15*   15*   2/    5-    5-    17+   12+
+(0,5),(1,5),(2,5),(3,5),(4,5),(5,5),(6,5),(7,5),(8,5)
+5-    21+   21+   15*   42*   17+   17+   17+   17+
+(0,6),(1,6),(2,6),(3,6),(4,6),(5,6),(6,6),(7,6),(8,6)
+20*   56*   56*   15*   42*   3-    17+   18*   18*
+(0,7),(1,7),(2,7),(3,7),(4,7),(5,7),(6,7),(7,7),(8,7)
+20*   20*   16+   16+   42*   3-    3-    3-    2+
+(0,8),(1,8),(2,8),(3,8),(4,8),(5,8),(6,8),(7,8),(8,8)
+8-    8-    16+   2/    2/    3/    2/    4-    4-
+    '''
+    print("Testing 9x9 empty board...", end='');
+    size = 9
+    puzzle = [([0]*size) for x in range(size)];
+    cage = [[[(0,0),(1,0)],3,'/'],[[(2,0),(3,0),(2,1),(2,2)],24,'+'],[[(4,0),(5,0)],2,'-'],[[(6,0),(7,0)],56,'*'],[[(8,0),(8,1)],7,'-'],[[(0,1),(1,1)],4,'-'],[[(3,1),(3,2)],1,'-'],[[(4,1),(4,2)],4,'-'],[[(5,1),(6,1)],2,'/'],[[(7,1)],1,'+'],[[(0,2),(1,2)],11,'+'],[[(5,2),(5,3)],8,'*'],[[(6,2),(7,2)],4,'/'],[[(8,2),(8,3),(8,4)],12,'+'],[[(0,3),(1,3)],5,'-'],[[(2,3),(3,3)],3,'/'],[[(4,3),(4,4)],2,'/'],[[(6,3),(7,3)],63,'*'],[[(0,4),(0,5)],5,'-'],[[(1,4),(1,5),(2,5)],21,'+'],[[(2,4),(3,4),(3,5),(3,6)],15,'*'],[[(5,4),(6,4)],5,'-'],[[(7,4),(7,5),(8,5)],17,'+'],[[(4,5),(4,6),(4,7)],42,'*'],[[(5,5),(6,5),(6,6)],17,'+'],[[(0,6),(0,7),(1,7)],20,'*'],[[(1,6),(2,6)],56,'*'],[[(5,6),(5,7)],3,'-'],[[(7,6),(8,6)],18,'*'],[[(2,7),(3,7),(2,8)],16,'+'],[[(6,7),(7,7)],3,'-'],[[(8,7)],2,'+'],[[(0,8),(1,8)],8,'-'],[[(3,8),(4,8)],2,'/'],[[(5,8),(6,8)],3,'/'],[[(7,8),(8,8)],4,'-']]
+    return run_csp(model, prop, size, puzzle, cage)
+
 def run_csp(model, prop, size, puzzle, cage):
     csp, vars_array = model(puzzle,cage);
 
@@ -205,45 +232,55 @@ def run_csp(model, prop, size, puzzle, cage):
 ###################main code#####################################
 models = [calcudoku_csp.calcudoku_csp_model_1, calcudoku_csp.calcudoku_csp_model_2]
 propagator_types = [propagators.prop_FC,propagators.prop_GAC]
-'''
+
 t2 = time.time()
 for m in models:
     for p in propagator_types:
         info_list = []
-        info_list.append(test_1x1(m,p))
-        info_list.append(test_2x2_1(m,p))
-        info_list.append(test_2x2_2(m,p))
+        #info_list.append(test_1x1(m,p))
+        #info_list.append(test_2x2_1(m,p))
+        #info_list.append(test_2x2_2(m,p))
         
-        info_list.append(test_3x3(m,p))
-        info_list.append(test_4x4(m,p))
-        info_list.append(test_5x5(m,p))
+        #info_list.append(test_3x3(m,p))
+        #info_list.append(test_4x4(m,p))
+        #info_list.append(test_5x5(m,p))
+        info_list.append(test_9x9_multiply_divide(m,p))
         #time, variable assignments, pruned variables
         
         if p == propagator_types[0] and m == models[0]:
             #time, variable assignments, pruned variables tupple lists for 6 tests by using FC
-            FC_info_list_m1 = list(info_list)            
+            FC_info_list_m1 = list(info_list)
+            print('FC m1::::::::::::::::::::::::')          
             print(FC_info_list_m1)
         if p == propagator_types[1] and m == models[0]:
             #time, variable assignments, pruned variables tupple lists for 6 tests by using GAC
             GAC_info_list_m1 = list(info_list)
+            print('GAC m1::::::::::::::::::::::::')
             print(GAC_info_list_m1)
-        #if p == propagator_types[2] and m == models[0]:
-        #    #time, variable assignments, pruned variables tupple lists for 6 tests by using BT
-        #    BT_info_list_m1 = list(info_list)
-        #    print(BT_info_list_m1)
+        '''
+        if p == propagator_types[2] and m == models[0]:
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using BT
+            BT_info_list_m1 = list(info_list)
+            print('BT m1::::::::::::::::::::::::')
+            print(BT_info_list_m1)
+        '''
         if p == propagator_types[0] and m == models[1]:
             #time, variable assignments, pruned variables tupple lists for 6 tests by using FC
             FC_info_list_m2 = list(info_list)
+            print('FC m2::::::::::::::::::::::::')
             print(FC_info_list_m2)
         if p == propagator_types[1] and m == models[1]:
             #time, variable assignments, pruned variables tupple lists for 6 tests by using GAC
             GAC_info_list_m2 = list(info_list)
+            print('GAC m2::::::::::::::::::::::::')
             print(GAC_info_list_m2)
-        #if p == propagator_types[2] and m == models[1]:
-        #    #time, variable assignments, pruned variables tupple lists for 6 tests by using BT
-        #    BT_time_list_m2 = list(info_list)
-        #    print(BT_time_list_m2)
-        
+        '''
+        if p == propagator_types[2] and m == models[1]:
+            #time, variable assignments, pruned variables tupple lists for 6 tests by using BT
+            BT_time_list_m2 = list(info_list)
+            print('BT m2::::::::::::::::::::::::')
+            print(BT_time_list_m2)
+        '''
 t3 = time.time()
 for_loop_difference = t3-t2
 print('total time for everything is: ',for_loop_difference)
@@ -284,4 +321,4 @@ for m in models:
 t5 = time.time()
 for_loop_difference = t5-t4
 print('total time for operations is: ',for_loop_difference)
-
+'''
